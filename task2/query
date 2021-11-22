@@ -1,0 +1,21 @@
+WITH CTE AS
+(
+SELECT  
+		dt, 
+		sotr, 
+		vsp,    
+		-- вычисляем разность между датой и номером строки, для последовательных дней результат будет одинаковый
+		dt - INTERVAL '1 DAY' * ROW_NUMBER() OVER(PARTITION BY sotr, vsp ORDER BY dt) AS prev  
+FROM    task2
+ORDER BY (sotr, dt, vsp)
+)
+SELECT  
+		MIN(dt) AS dt_start,
+		MAX(dt) AS dt2_end,
+		sotr,
+        vsp
+FROM    CTE
+GROUP BY sotr, vsp, prev
+-- оставляем последовательности продолжительностью больше одного дня
+HAVING COUNT(prev) > 1
+ORDER BY dt_start;

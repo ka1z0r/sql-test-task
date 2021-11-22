@@ -1,0 +1,43 @@
+--CREATE OR REPLACE PROCEDURE task4_procedure(table_name regclass)
+CREATE OR REPLACE PROCEDURE task4_procedure()
+LANGUAGE sql
+AS $$
+DROP TABLE IF EXISTS task4_result;
+CREATE TABLE task4_result(sotr INT, date DATE, timer_sotr TIME, time_avg TIME);
+-- тут выдает ошибку 'отношение "task4_result" не существует'. пока не разобрался почему
+INSERT INTO task4_result
+WITH cte1 AS
+(select 
+	sotr,
+	date,
+	start_time,
+	end_time,
+	--end_time - start_time,
+	SUM(end_time - start_time) OVER(PARTITION BY DATE, sotr) AS time_sotr	
+from task4
+ORDER BY (date, sotr, start_time)
+), cte2 AS
+(SELECT 
+	sotr,
+	date,
+	time_sotr
+FROM cte1
+GROUP BY (sotr, date, time_sotr)
+ORDER BY (date, sotr)
+), cte3 AS
+(SELECT 
+	sotr,
+	date,
+	time_sotr,
+	SUM(time_sotr) OVER(PARTITION BY date),
+	COUNT(time_sotr) OVER(PARTITION BY date),
+	(SUM(time_sotr) OVER(PARTITION BY date) - time_sotr) / (COUNT(time_sotr) OVER(PARTITION BY date) - 1) AS time_avg
+FROM cte2)
+SELECT sotr, date, time_sotr, time_avg
+FROM cte3
+WHERE time_sotr < time_avg;
+
+$$;
+
+CALL task4_procedure();
+

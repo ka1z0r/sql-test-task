@@ -1,0 +1,14 @@
+-- создаем таблицу
+CREATE TABLE task1(
+   BUSINESS_DT DATE DEFAULT '2017-05-19',
+   EVENT_DTTM TIME(0),
+   TICKET_ID CHAR(4) UNIQUE
+);
+
+-- генерация тестовых данных 
+INSERT INTO task1(EVENT_DTTM,TICKET_ID)
+SELECT 
+	  TIME '8:00:00' + RANDOM() * INTERVAL '12 hours',
+	  left(md5(random()::text), 4)  
+FROM generate_series(1,100)
+ON CONFLICT DO NOTHING;

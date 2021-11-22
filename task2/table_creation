@@ -1,0 +1,20 @@
+-- создаем таблицу
+CREATE TABLE task2(
+   dt DATE,
+   sotr VARCHAR(20),
+   vsp VARCHAR(9),
+   UNIQUE (dt, sotr)
+);
+
+
+-- генерация тестовых данных 
+INSERT INTO task2(dt, sotr, vsp)
+SELECT
+			-- случайная дата в 2017 году
+			DATE '2017-01-01' + RANDOM() * INTERVAL '1 YEAR',
+			-- один из сотрудников
+			(array['Ivanov', 'Petrov', 'Sidorov'])[n % 3+1],
+			-- одно из отделений
+	        (array['9000_0000','8000_0000','7000_0000'])[n % 3+1]
+FROM generate_series(1,1000) n
+ON CONFLICT DO NOTHING;

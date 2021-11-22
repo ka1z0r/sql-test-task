@@ -1,0 +1,31 @@
+-- создаем таблицу
+CREATE TABLE task4(
+    sotr INT,
+    date DATE,
+    start_time TIME,
+    end_time TIME,
+	UNIQUE (sotr, date, start_time),
+	-- конец периода доступности позже начала
+    CHECK (start_time < end_time));
+	
+
+-- генерация тестовых данных 
+DO
+$do$
+BEGIN 
+	-- генерируем данные для восьми сотрудников
+   	FOR i IN 1..8 LOOP
+		INSERT INTO task4        
+		SELECT
+      		(array[370077493, 370080644, 197921100, 369123797, 241898276, 370098915, 370099786, 370091652])[i],
+			-- генерируем 48/16 = 3 рабочих дня
+			DATE '2019-02-22' + INTERVAL '1 DAYS' * ((n - 1) / 16),
+			-- в 30 минутный интервал задаем start в первые 5 минут
+			TIME '8:00:00' + INTERVAL '30 MINUTES' * (n % 16) + INTERVAL '1 SECOND' * CAST(random() * 300 AS int),
+			-- в 30 минутный интервал задаем end с 5ой до 30ой минуты 
+			TIME '8:00:00' + INTERVAL '30 MINUTES' * (n % 16) + INTERVAL '1 SECOND' * (CAST(random() * 1500 AS int) + 300)
+		FROM generate_series(1, 48) n
+		ON CONFLICT DO NOTHING;
+	END LOOP;
+END
+$do$;
