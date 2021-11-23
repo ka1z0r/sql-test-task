@@ -4,24 +4,13 @@ AS $$
 DROP TABLE IF EXISTS task4_result;
 WITH cte1 AS (
 	SELECT 
-		sotr,
+		DISTINCT sotr,
 		date,
-		start_time,
-		end_time,
 		-- вычисляем время доступности сотрудника за день
-		SUM(end_time - start_time) OVER(PARTITION BY date, sotr) AS time_sotr	
+		SUM(end_time - start_time) OVER(PARTITION BY date, sotr) AS time_sotr
 	FROM task4
-	ORDER BY (date, sotr, start_time)
+	ORDER BY sotr, date
 ), cte2 AS (
-	SELECT 
-		sotr,
-		date,
-		time_sotr
-	FROM cte1
-	-- группируем одинаковые комбинации
-	GROUP BY (sotr, date, time_sotr)
-	ORDER BY (date, sotr)
-), cte3 AS (
 	SELECT 
 		sotr,
 		date,
@@ -32,7 +21,7 @@ WITH cte1 AS (
 		COUNT(time_sotr) OVER(PARTITION BY date),
 		-- вычисляем среднее значение времени доступности по остальным сотрудникам в тот же день
 		(SUM(time_sotr) OVER(PARTITION BY date) - time_sotr) / (COUNT(time_sotr) OVER(PARTITION BY date) - 1) AS time_avg
-	FROM cte2
+	FROM cte1
 )
 SELECT 
 	sotr, 
@@ -40,7 +29,7 @@ SELECT
 	time_sotr::time(0),
 	time_avg::time(0)
 INTO task4_result
-FROM cte3
+FROM cte2
 WHERE time_sotr < time_avg;
 $$;
 

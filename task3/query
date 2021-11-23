@@ -22,8 +22,8 @@ SELECT
 	subbranch_id,
 	week_number,
 	-- округляем самую раннюю регистрацию клиента за неделю до ближайшего предшествующего получаса
-	EXTRACT(EPOCH FROM earliest_talon)::integer / 1800 * 1800 * interval '1 second',
+	EXTRACT(EPOCH FROM earliest_talon)::integer / 1800 * 1800 * INTERVAL '1 second',
 	-- округляем самую позднюю регистрацию клиента за неделю до ближайшего последующего получаса
-	EXTRACT(EPOCH FROM latest_talon)::integer / 1800 * 1800 * interval '1 second' + INTERVAL '30 minutes'
+	EXTRACT(EPOCH FROM latest_talon)::integer / 1800 * 1800 * INTERVAL '1 second' + INTERVAL '30 minutes'
 FROM cte2
 ORDER BY week_number;
