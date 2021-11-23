@@ -2,8 +2,9 @@
 SELECT * 
 FROM
 (SELECT 
- 	BUSINESS_DT, 
- 	EVENT_DTTM last_talon, 
- 	LEAD(EVENT_DTTM) OVER(ORDER BY EVENT_DTTM) next_talon 
+ 	"BUSINESS_DT", 
+ 	"EVENT_DTTM" last_talon,
+ 	-- время отрыва следующего талона
+ 	LEAD("EVENT_DTTM") OVER(ORDER BY "EVENT_DTTM") next_talon 
 FROM task1) temp
 WHERE temp.next_talon IS NOT NULL;

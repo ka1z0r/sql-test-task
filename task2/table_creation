@@ -13,8 +13,8 @@ SELECT
 			-- случайная дата в 2017 году
 			DATE '2017-01-01' + RANDOM() * INTERVAL '1 YEAR',
 			-- один из сотрудников
-			(array['Ivanov', 'Petrov', 'Sidorov'])[n % 3+1],
+			(array['Ivanov', 'Petrov', 'Sidorov'])[CAST(random()*3 AS int) % 3+1],
 			-- одно из отделений
-	        (array['9000_0000','8000_0000','7000_0000'])[n % 3+1]
-FROM generate_series(1,1000) n
+	        (array['9000_0000','8000_0000','7000_0000'])[CAST(random()*3 AS int) % 3+1]
+FROM generate_series(1,1000)
 ON CONFLICT DO NOTHING;
