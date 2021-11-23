@@ -2,38 +2,43 @@ CREATE OR REPLACE PROCEDURE task4_procedure()
 LANGUAGE sql
 AS $$
 DROP TABLE IF EXISTS task4_result;
-WITH cte1 AS
-(select 
-	sotr,
+WITH cte1 AS (
+	SELECT 
+		sotr,
+		date,
+		start_time,
+		end_time,
+		-- вычисляем время доступности сотрудника за день
+		SUM(end_time - start_time) OVER(PARTITION BY date, sotr) AS time_sotr	
+	FROM task4
+	ORDER BY (date, sotr, start_time)
+), cte2 AS (
+	SELECT 
+		sotr,
+		date,
+		time_sotr
+	FROM cte1
+	-- группируем одинаковые комбинации
+	GROUP BY (sotr, date, time_sotr)
+	ORDER BY (date, sotr)
+), cte3 AS (
+	SELECT 
+		sotr,
+		date,
+		time_sotr,
+		-- вычисляем время доступности всех сотрудников
+		SUM(time_sotr) OVER(PARTITION BY date),
+		-- вычисляем количество сотрудников за день
+		COUNT(time_sotr) OVER(PARTITION BY date),
+		-- вычисляем среднее значение времени доступности по остальным сотрудникам в тот же день
+		(SUM(time_sotr) OVER(PARTITION BY date) - time_sotr) / (COUNT(time_sotr) OVER(PARTITION BY date) - 1) AS time_avg
+	FROM cte2
+)
+SELECT 
+	sotr, 
 	date,
-	start_time,
-	end_time,
- 	-- вычисляем время доступности сотрудника за день
-	SUM(end_time - start_time) OVER(PARTITION BY date, sotr) AS time_sotr	
-from task4
-ORDER BY (date, sotr, start_time)
-), cte2 AS
-(SELECT 
-	sotr,
-	date,
-	time_sotr
-FROM cte1
--- группируем одинаковые комбинации
-GROUP BY (sotr, date, time_sotr)
-ORDER BY (date, sotr)
-), cte3 AS
-(SELECT 
-	sotr,
-	date,
-	time_sotr,
- 	-- вычисляем время доступности всех сотрудников
-	SUM(time_sotr) OVER(PARTITION BY date),
- 	-- вычисляем количество сотрудников за день
-	COUNT(time_sotr) OVER(PARTITION BY date),
- 	-- вычисляем среднее значение времени доступности по остальным сотрудникам в тот же день
-	(SUM(time_sotr) OVER(PARTITION BY date) - time_sotr) / (COUNT(time_sotr) OVER(PARTITION BY date) - 1) AS time_avg
-FROM cte2)
-SELECT sotr, date, time_sotr::time(0), time_avg::time(0)
+	time_sotr::time(0),
+	time_avg::time(0)
 INTO task4_result
 FROM cte3
 WHERE time_sotr < time_avg;

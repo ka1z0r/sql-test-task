@@ -1,24 +1,23 @@
-WITH cte AS
-(
-SELECT  
-		dt, 
-		sotr, 
-		vsp,    
-		-- вычисляем разность между датой и номером строки этой даты в партиции по sotr и vsp, 
+WITH cte AS (
+	SELECT 
+		dt,
+		sotr,
+		vsp,
+		-- вычисляем разность между датой и номером строки этой даты в партиции по sotr и vsp,
 		-- отсортированной по дате, умноженным на INTERVAL '1 DAY'.
 		-- для последовательных дней результат будет одинаковый
-		dt - INTERVAL '1 DAY' * ROW_NUMBER() OVER(PARTITION BY sotr, vsp ORDER BY dt) AS period_id  
-FROM    task2
-ORDER BY (sotr, dt, vsp)
+		dt - INTERVAL '1 DAY' * ROW_NUMBER() OVER (PARTITION BY sotr, vsp ORDER BY dt) AS period_id
+	FROM task2
+	ORDER BY (sotr, dt, vsp)
 )
-SELECT  
-		-- первый день периода работы
-		MIN(dt) AS dt_start,
-		-- последний день периода работы
-		MAX(dt) AS dt2_end,
-		sotr,
-        vsp
-FROM    cte
+SELECT
+    -- первый день периода работы
+    MIN(dt) AS dt_start,
+    -- последний день периода работы
+    MAX(dt) AS dt2_end,
+    sotr,
+    vsp
+FROM cte
 -- группируем по сотруднику, всп и периоду работу
 GROUP BY sotr, vsp, period_id
 -- оставляем периоды продолжительностью больше одного дня

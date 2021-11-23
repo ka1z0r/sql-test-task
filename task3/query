@@ -1,29 +1,29 @@
 WITH cte1 AS (
-SELECT 
-	subbranch_id,
-    business_dt,
-    first_talon,
-    last_talon,
-	-- вычисляем номер недели
-	EXTRACT('week' FROM BUSINESS_DT) AS week_number
-FROM task3
+    SELECT 
+		subbranch_id,
+	    business_dt,
+	    first_talon,
+	    last_talon,
+	    -- вычисляем номер недели
+	    EXTRACT('week' FROM BUSINESS_DT) AS week_number
+    FROM task3
 ), cte2 AS (
+	SELECT 
+		subbranch_id,
+		week_number,
+		-- вычисляем самую раннюю регистрацию клиента за рабочую неделю
+		MIN(first_talon) earliest_talon,
+		-- вычисляем самую позднюю регистрацию клиента за рабочую неделю
+		MAX(last_talon)  latest_talon
+	FROM cte1
+	GROUP BY (subbranch_id, week_number)
+)
 SELECT 
 	subbranch_id,
 	week_number,
-	-- вычисляем самую раннюю регистрацию клиента за рабочую неделю
-	MIN(first_talon) earliest_talon,
-	-- вычисляем самую позднюю регистрацию клиента за рабочую неделю
-	MAX(last_talon) latest_talon
-FROM cte1
-GROUP BY (subbranch_id, week_number)
-)
-SELECT 
-		subbranch_id,
-		week_number,
-		-- округляем самую раннюю регистрацию клиента за неделю до ближайшего предшествующего получаса
-		EXTRACT(EPOCH FROM earliest_talon)::integer / 1800 * 1800 * interval '1 second',
-		-- округляем самую позднюю регистрацию клиента за неделю до ближайшего последующего получаса
-		EXTRACT(EPOCH FROM latest_talon)::integer / 1800 * 1800 * interval '1 second' + INTERVAL '30 minutes'		
+	-- округляем самую раннюю регистрацию клиента за неделю до ближайшего предшествующего получаса
+	EXTRACT(EPOCH FROM earliest_talon)::integer / 1800 * 1800 * interval '1 second',
+	-- округляем самую позднюю регистрацию клиента за неделю до ближайшего последующего получаса
+	EXTRACT(EPOCH FROM latest_talon)::integer / 1800 * 1800 * interval '1 second' + INTERVAL '30 minutes'
 FROM cte2
 ORDER BY week_number;

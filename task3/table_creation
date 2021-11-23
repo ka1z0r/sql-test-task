@@ -1,25 +1,26 @@
 -- создаем таблицу
-CREATE TABLE task3(
-   subbranch_id INT,
-   business_dt DATE,
-   first_talon TIME,
-   last_talon TIME,
-   UNIQUE (subbranch_id, business_dt,first_talon, last_talon)
+CREATE TABLE task3
+(
+    subbranch_id INT,
+    business_dt  DATE,
+    first_talon  TIME,
+    last_talon   TIME,
+    UNIQUE (subbranch_id, business_dt, first_talon, last_talon)
 );
 
 
 -- генерация тестовых данных 
 INSERT INTO task3
-SELECT 		
-		-- business_dt
-		1001763,
-		-- четыре пятидневки
-		DATE '2017-04-03' + INTERVAL '7 DAYS' * ((n - 1) / 5) + INTERVAL '1 DAYS' * ((n - 1) % 5),
-		-- случайное время первого талона в диапозоне 30 минут от начала рабочего дня, 
-		-- рабочий день начинается на 30 минут позже с каждой последующей неделей
-		TIME '8:30:00' + INTERVAL '30 MINUTES' * ((n - 1) / 5) + INTERVAL '1 SECOND' * CAST(random() * 1800 AS int),
-		-- случайное время последнего талона в диапозоне 30 минут до конца рабочего дня, 
-		-- рабочий день заканчивается на 30 минут раньше с каждой последующей неделей
-		TIME '18:00:00' - INTERVAL '30 MINUTES' * ((n - 1) / 5) - INTERVAL '1 SECOND' * CAST(random() * 1800 AS int)
-FROM generate_series(1,20) n
+SELECT
+    -- business_dt
+    1001763,
+    -- четыре пятидневки
+    DATE '2017-04-03' + INTERVAL '7 DAYS' * ((n - 1) / 5) + INTERVAL '1 DAYS' * ((n - 1) % 5),
+    -- случайное время первого талона в диапозоне 30 минут от начала рабочего дня,
+    -- рабочий день начинается на 30 минут позже с каждой последующей неделей
+    TIME '8:30:00' + INTERVAL '30 MINUTES' * ((n - 1) / 5) + INTERVAL '1 SECOND' * CAST(random() * 1800 AS int),
+    -- случайное время последнего талона в диапозоне 30 минут до конца рабочего дня,
+    -- рабочий день заканчивается на 30 минут раньше с каждой последующей неделей
+    TIME '18:00:00' - INTERVAL '30 MINUTES' * ((n - 1) / 5) - INTERVAL '1 SECOND' * CAST(random() * 1800 AS int)
+FROM generate_series(1, 20) n
 ON CONFLICT DO NOTHING;

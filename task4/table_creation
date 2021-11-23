@@ -1,12 +1,14 @@
 -- создаем таблицу
-CREATE TABLE task4(
-    sotr INT,
-    date DATE,
+CREATE TABLE task4
+(
+    sotr       INT,
+    date       DATE,
     start_time TIME,
-    end_time TIME,
-	UNIQUE (sotr, date, start_time),
-	-- конец периода доступности позже начала
-    CHECK (start_time < end_time));
+    end_time   TIME,
+    UNIQUE (sotr, date, start_time),
+    -- конец периода доступности позже начала
+    CHECK (start_time < end_time)
+);
 	
 
 -- генерация тестовых данных 
